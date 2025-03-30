@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Escolinhas</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, button {
+            margin-top: 5px;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gerenciamento de Escolinhas de Futebol</h1>
+
+    <!-- Formulário para registro -->
+    <h2>Registrar Usuário</h2>
+    <form id="registerForm">
+        <label for="username">Nome de Usuário:</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="password">Senha:</label>
+        <input type="password" id="password" name="password" required>
+
+        <label for="isAdmin">É Administrador?</label>
+        <input type="checkbox" id="isAdmin" name="isAdmin">
+
+        <button type="submit">Registrar</button>
+    </form>
+
+    <!-- Formulário para login -->
+    <h2>Login</h2>
+    <form id="loginForm">
+        <label for="loginUsername">Nome de Usuário:</label>
+        <input type="text" id="loginUsername" name="username" required>
+
+        <label for="loginPassword">Senha:</label>
+        <input type="password" id="loginPassword" name="password" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <!-- Formulário para adicionar escolinhas -->
+    <h2>Adicionar Escolinha</h2>
+    <form id="addSchoolForm">
+        <label for="schoolName">Nome da Escolinha:</label>
+        <input type="text" id="schoolName" name="name" required>
+
+        <label for="schoolLocation">Localização:</label>
+        <input type="text" id="schoolLocation" name="location" required>
+
+        <label for="schoolContact">Contato:</label>
+        <input type="text" id="schoolContact" name="contact" required>
+
+        <button type="submit">Adicionar Escolinha</button>
+    </form>
+
+    <!-- Botão para listar escolinhas -->
+    <h2>Listar Escolinhas</h2>
+    <button id="listSchoolsButton">Listar Escolinhas</button>
+
+    <!-- Área para exibir respostas -->
+    <div class="response" id="response"></div>
+
+    <script>
+        const apiUrl = 'http://localhost:5000'; // URL base da API
+        let token = ''; // Token JWT armazenado após login
+
+        // Registrar usuário
+        document.getElementById('registerForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const isAdmin = document.getElementById('isAdmin').checked;
+
+            const response = await fetch(`${apiUrl}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, isAdmin })
+            });
+
+            const result = await response.json();
+            document.getElementById('response').innerText = JSON.stringify(result, null, 2);
+        });
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const response = await fetch(`${apiUrl}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                token = result.token; // Armazena o token JWT
+                alert('Login bem-sucedido!');
+            }
+            document.getElementById('response').innerText = JSON.stringify(result, null, 2);
+        });
+
+        // Adicionar escolinha
+        document.getElementById('addSchoolForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('schoolName').value;
+            const location = document.getElementById('schoolLocation').value;
+            const contact = document.getElementById('schoolContact').value;
+
+            const response = await fetch(`${apiUrl}/add_school`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-token': token
+                },
+                body: JSON.stringify({ name, location, contact })
+            });
+
+            const result = await response.json();
+            document.getElementById('response').innerText = JSON.stringify(result, null, 2);
+        });
+
+        // Listar escolinhas
+        document.getElementById('listSchoolsButton').addEventListener('click', async () => {
+            const response = await fetch(`${apiUrl}/schools`, {
+                method: 'GET'
+            });
+
+            const result = await response.json();
+            document.getElementById('response').innerText = JSON.stringify(result, null, 2);
+        });
+    </script>
+</body>
+</html>import os  # Import necessário para localizar o arquivo HTML
